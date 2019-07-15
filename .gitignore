@@ -1,0 +1,9 @@
+/_build/
+/cover/
+/deps/
+/doc/
+/.fetch
+erl_crash.dump
+*.ez
+pinboard_declutter-*.tar
+pinboard_declutter
