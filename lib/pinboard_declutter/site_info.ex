@@ -15,9 +15,13 @@ defmodule PinboardDeclutter.SiteInfo do
   def parse(url, _action, @max_redirects), do: %PinboardDeclutter.SiteInfo{url: url, action: :delete}
 
   def parse(url, action, redirects) do
-    url
-    |> get([], [ssl: [{:versions, [:'tlsv1.2']}]]) # Broken SSL in Elixir 1.9?
-    |> process(url, action, redirects)
+    try do
+      url
+      |> get([], [ssl: [{:versions, [:'tlsv1.2']}]]) # Broken SSL in Elixir 1.9?
+      |> process(url, action, redirects)
+    rescue
+      CaseClauseError -> %PinboardDeclutter.SiteInfo{url: url, action: :pass}
+    end
   end
 
   def fix_url(path, original) do
@@ -32,7 +36,7 @@ defmodule PinboardDeclutter.SiteInfo do
 
   def process({:ok, %{headers: headers, status_code: code}}, url, _action, redirects) when code in [301, 308] do
     headers
-    |> Enum.find(fn elm -> elem(elm, 0) == "Location" end)
+    |> Enum.find(fn elm -> String.downcase(elem(elm, 0)) == "location" end)
     |> elem(1)
     |> fix_url(url)
     |> parse(:replace, redirects + 1)
