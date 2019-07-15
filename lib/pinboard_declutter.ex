@@ -40,10 +40,18 @@ defmodule PinboardDeclutter do
   end
 
   @doc """
-  Main process of our script.
+  Processes bookmarks using username and password.
   """
   def process(%{username: _, password: _} = auth), do: _process(auth)
+
+  @doc """
+  Processes bookmarks using token credential.
+  """
   def process(%{token: _} = auth), do: _process(auth)
+
+  @doc """
+  Displays help info.
+  """
   def process(_) do
     IO.puts """
     Usage
@@ -61,6 +69,10 @@ defmodule PinboardDeclutter do
     exit(:normal)
   end
 
+  @doc """
+  Actual processing of bookmarks. Fetches all bookmarks and put enqueue them
+  to processing.
+  """
   def _process(auth) do
     Logger.info("Fetching all bookmarks...")
 
@@ -70,6 +82,16 @@ defmodule PinboardDeclutter do
     |> enqueue(auth)
   end
 
+  @doc """
+  Fetch posts from the Pinboard API response Map after user `parse_response`.
+  """
+  def fetch_posts({:ok, posts}) do
+    posts
+  end
+
+  @doc """
+  Creates a queue with OPQ to execute and process entries concurrently.
+  """
   def enqueue(posts, auth) do
     {:ok, opq} = OPQ.init
 
@@ -82,22 +104,21 @@ defmodule PinboardDeclutter do
     run(OPQ.info(opq), opq)
   end
 
+  @doc """
+  Closes the process once every item from the queue is processed.
+  """
   def run({:normal, {[], []}, _}, _opq) do
     Process.sleep(2000)
 
     exit(:normal)
   end
 
+  @doc """
+  Keeps the process alive the queue is being executed.
+  """
   def run({:normal, _queue, _}, opq) do
     Process.sleep(1000)
 
     run(OPQ.info(opq), opq)
-  end
-
-  @doc """
-  Fetch posts from the Pinboard API response Map after user `parse_response`.
-  """
-  def fetch_posts({:ok, posts}) do
-    posts
   end
 end

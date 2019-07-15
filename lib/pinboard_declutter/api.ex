@@ -11,6 +11,9 @@ defmodule PinboardDeclutter.API do
 
   @endpoint "https://api.pinboard.in/v1"
 
+  @doc """
+  Performs a GET request to the api using username and password credentials.
+  """
   def g(%{username: username, password: password}, path) do
     Logger.debug("GET: #{path}")
 
@@ -20,6 +23,9 @@ defmodule PinboardDeclutter.API do
     get(path, auth) |> parse_response()
   end
 
+  @doc """
+  Performs a GET request to the api using token credential.
+  """
   def g(%{token: token}, path) do
     path = path <> get_separator(path) <> "auth_token=" <> token
 
@@ -29,7 +35,7 @@ defmodule PinboardDeclutter.API do
   end
 
   @doc """
-  Transforms the XML response from Pinboard API to a Map.
+  Transforms the JSON response from Pinboard API to a Map.
   """
   def parse_response({:ok, %{body: body, status_code: 200}}) do
     Jason.decode(body)
@@ -51,10 +57,14 @@ defmodule PinboardDeclutter.API do
     exit(:normal)
   end
 
+  @impl true
   def process_url(url) do
     @endpoint <> url <> get_separator(url) <> "format=json"
   end
 
+  @doc """
+  Decides what will be the "glue" to append query strings to the path.
+  """
   def get_separator(url) do
     if String.contains?(url, "?"), do: "&", else: "?"
   end
