@@ -6,4 +6,4 @@
 erl_crash.dump
 *.ez
 pinboard_declutter-*.tar
-pinboard_declutter
+/pinboard_declutter
