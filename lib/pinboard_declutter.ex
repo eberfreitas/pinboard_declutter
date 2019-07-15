@@ -58,7 +58,7 @@ defmodule PinboardDeclutter do
         > pinboard_declutter --token YOUR_TOKEN_HERE
     """
 
-    System.halt(0)
+    exit(:normal)
   end
 
   def _process(auth) do
