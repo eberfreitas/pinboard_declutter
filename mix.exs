@@ -27,6 +27,7 @@ defmodule PinboardDeclutter.MixProject do
       {:httpoison, "~> 1.4"},
       {:jason, "~> 1.1"},
       {:floki, "~> 0.1"},
+      {:opq, "~> 3.1"},
     ]
   end
 

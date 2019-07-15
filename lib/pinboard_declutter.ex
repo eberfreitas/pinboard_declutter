@@ -67,7 +67,31 @@ defmodule PinboardDeclutter do
     auth
     |> API.g("/posts/all")
     |> fetch_posts()
-    |> Enum.each(&Updater.execute(&1, auth))
+    |> enqueue(auth)
+  end
+
+  def enqueue(posts, auth) do
+    {:ok, opq} = OPQ.init
+
+    Enum.each(posts, fn post ->
+      OPQ.enqueue(opq, fn ->
+        Updater.execute(post, auth)
+      end)
+    end)
+
+    run(OPQ.info(opq), opq)
+  end
+
+  def run({:normal, {[], []}, _}, _opq) do
+    Process.sleep(2000)
+
+    exit(:normal)
+  end
+
+  def run({:normal, _queue, _}, opq) do
+    Process.sleep(1000)
+
+    run(OPQ.info(opq), opq)
   end
 
   @doc """
