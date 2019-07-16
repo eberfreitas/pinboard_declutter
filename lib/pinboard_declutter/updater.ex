@@ -1,5 +1,4 @@
 defmodule PinboardDeclutter.Updater do
-
   alias PinboardDeclutter.{API, SiteInfo}
 
   require Logger
@@ -26,7 +25,7 @@ defmodule PinboardDeclutter.Updater do
   def process(%{action: :delete} = info, original, auth) do
     Logger.info("Deleting #{original["href"]}")
 
-    API.g(auth, "/posts/delete?#{URI.encode_query([url: original["href"]])}")
+    API.g(auth, "/posts/delete?#{URI.encode_query(url: original["href"])}")
     |> log(info)
   end
 
@@ -44,7 +43,7 @@ defmodule PinboardDeclutter.Updater do
   def process(%{action: :replace} = info, original, auth) do
     Logger.info("Replacing #{original["href"]} with #{info.url}")
 
-    API.g(auth, "/posts/delete?#{URI.encode_query([url: original["href"]])}")
+    API.g(auth, "/posts/delete?#{URI.encode_query(url: original["href"])}")
 
     query_string = make_query_string(info, original)
 

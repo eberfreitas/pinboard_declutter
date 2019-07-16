@@ -1,5 +1,4 @@
 defmodule PinboardDeclutter.SiteInfo do
-
   @moduledoc """
   Parses information from URLs. Extracts page title and description from HTML.
   """
@@ -16,7 +15,8 @@ defmodule PinboardDeclutter.SiteInfo do
   @doc """
   Called once we reach the maximum of redirects trying to resolve a URL.
   """
-  def parse(url, _action, @max_redirects), do: %PinboardDeclutter.SiteInfo{url: url, action: :delete}
+  def parse(url, _action, @max_redirects),
+    do: %PinboardDeclutter.SiteInfo{url: url, action: :delete}
 
   @doc """
   Tries to parse a URL a returns a full filled struct.
@@ -24,7 +24,8 @@ defmodule PinboardDeclutter.SiteInfo do
   def parse(url, action, redirects) do
     try do
       url
-      |> get([], [ssl: [{:versions, [:'tlsv1.2']}]]) # Broken SSL in Elixir 1.9?
+      # Broken SSL in Elixir 1.9?
+      |> get([], ssl: [{:versions, [:"tlsv1.2"]}])
       |> process(url, action, redirects)
     rescue
       CaseClauseError -> %PinboardDeclutter.SiteInfo{url: url, action: :pass}
@@ -40,16 +41,18 @@ defmodule PinboardDeclutter.SiteInfo do
       %{host: nil} ->
         orig = URI.parse(original)
         "#{orig.scheme}://#{orig.host}#{path}"
+
       %{host: _host} ->
         path
-      end
+    end
   end
 
   @doc """
   If we get a redirect (http status codes 301 or 308), we extract the new URL
   and try to process it again.
   """
-  def process({:ok, %{headers: headers, status_code: code}}, url, _action, redirects) when code in [301, 308] do
+  def process({:ok, %{headers: headers, status_code: code}}, url, _action, redirects)
+      when code in [301, 308] do
     headers
     |> Enum.find(fn elm -> String.downcase(elem(elm, 0)) == "location" end)
     |> elem(1)

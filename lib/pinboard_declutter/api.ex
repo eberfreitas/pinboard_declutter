@@ -1,5 +1,4 @@
 defmodule PinboardDeclutter.API do
-
   use HTTPoison.Base
 
   require Logger

@@ -1,5 +1,4 @@
 defmodule PinboardDeclutter do
-
   alias PinboardDeclutter.{API, Updater}
 
   require Logger
@@ -36,7 +35,7 @@ defmodule PinboardDeclutter do
   def parse_args(argv) do
     OptionParser.parse(argv, strict: [username: :string, password: :string, token: :string])
     |> elem(0)
-    |> Enum.into(Map.new)
+    |> Enum.into(Map.new())
   end
 
   @doc """
@@ -53,7 +52,7 @@ defmodule PinboardDeclutter do
   Displays help info.
   """
   def process(_) do
-    IO.puts """
+    IO.puts("""
     Usage
     -----
 
@@ -64,7 +63,7 @@ defmodule PinboardDeclutter do
     Using your token:
 
         > pinboard_declutter --token YOUR_TOKEN_HERE
-    """
+    """)
 
     exit(:normal)
   end
@@ -93,7 +92,7 @@ defmodule PinboardDeclutter do
   Creates a queue with OPQ to execute and process entries concurrently.
   """
   def enqueue(posts, auth) do
-    {:ok, opq} = OPQ.init
+    {:ok, opq} = OPQ.init()
 
     Enum.each(posts, fn post ->
       OPQ.enqueue(opq, fn ->
