@@ -3,6 +3,8 @@ defmodule PinboardDeclutter do
 
   require Logger
 
+  @workers 16
+
   @moduledoc """
   # Pinboard Declutter
 
@@ -21,6 +23,8 @@ defmodule PinboardDeclutter do
       iex> PinboardDeclutter.main(["--token", "YOURTOKEN"])
   """
   def main(argv) do
+    Logger.configure(level: :warn)
+
     argv
     |> parse_args
     |> process()
@@ -92,32 +96,48 @@ defmodule PinboardDeclutter do
   Creates a queue with OPQ to execute and process entries concurrently.
   """
   def enqueue(posts, auth) do
-    {:ok, opq} = OPQ.init()
+    me = self()
+    total = Enum.count(posts)
+
+    {:ok, opq} = OPQ.init(workers: @workers)
 
     Enum.each(posts, fn post ->
       OPQ.enqueue(opq, fn ->
         Updater.execute(post, auth)
+
+        send(me, {OPQ.info(opq), total})
       end)
     end)
 
-    run(OPQ.info(opq), opq)
+    check()
   end
 
   @doc """
-  Closes the process once every item from the queue is processed.
+  Receives messages from the queue processes and exists when there are no more
+  items in queue to be processed.
   """
-  def run({:normal, {[], []}, _}, _opq) do
-    Process.sleep(2000)
+  def check(processed \\ 0) do
+    receive do
+      {{:normal, {[], []}, workers}, total} ->
+        if workers == @workers - 1 do
+          progress(total, total)
 
-    exit(:normal)
+          exit(:normal)
+        else
+          progress(processed, total)
+          check(processed + 1)
+        end
+
+      {{:normal, _, _}, total} ->
+        progress(processed, total)
+        check(processed + 1)
+    end
   end
 
   @doc """
-  Keeps the process alive the queue is being executed.
+  Displays a progress bar on screen.
   """
-  def run({:normal, _queue, _}, opq) do
-    Process.sleep(1000)
-
-    run(OPQ.info(opq), opq)
+  def progress(curr, total) do
+    ProgressBar.render(curr, total)
   end
 end
