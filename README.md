@@ -7,7 +7,7 @@ Right now it...
 - Checks for different title and description and updates the entry with new data;
 - Checks if the URL is a 404 and deletes it;
 - Checks if the URL is unavailable and deletes it;
-- Follows redirects and replaces the old entry with the new one (only 201 and 302 http statuses).
+- Follows redirects and replaces the old entry with the new one (only 301 and 302 http statuses).
 
 ## Compiling
 
