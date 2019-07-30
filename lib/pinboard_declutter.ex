@@ -88,9 +88,7 @@ defmodule PinboardDeclutter do
   @doc """
   Fetch posts from the Pinboard API response Map after user `parse_response`.
   """
-  def fetch_posts({:ok, posts}) do
-    posts
-  end
+  def fetch_posts({:ok, posts}), do: posts
 
   @doc """
   Creates a queue with OPQ to execute and process entries concurrently.
